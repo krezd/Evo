@@ -21,9 +21,12 @@ public class WeatherService {
     @Value("${appid}")
     private String appId;
 
+    @Value("${urlWeather}")
+    private String urlWeather;
+
     @Cacheable(cacheNames="root", key = "#lat + ',' + #lon")
     public Root getRoot(String lat, String lon) throws JsonProcessingException {
-        String url = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&appid="+appId+"&units=metric";
+        String url = urlWeather+"?lat="+lat+"&lon="+lon+"&appid="+appId+"&units=metric";
         String response = restTemplate.getForObject(url, String.class);
         Root root = objectMapper.readValue(response, Root.class);
         return root;
@@ -31,7 +34,7 @@ public class WeatherService {
 
     @Cacheable(cacheNames="main", key = "#lat + ',' + #lon")
     public Main getMain(String lat, String lon) throws JsonProcessingException {
-        String url = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&appid="+appId+"&units=metric";
+        String url = urlWeather + "?lat="+lat+"&lon="+lon+"&appid="+appId+"&units=metric";
         String response = restTemplate.getForObject(url, String.class);
         Main main = objectMapper.readValue(response, Root.class).getMain();
         return main;
