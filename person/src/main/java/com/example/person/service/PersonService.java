@@ -19,7 +19,7 @@ public class PersonService {
     public ResponseEntity<Weather> getWeather(int id) {
         if (personRepository.existsById(id)) {
             String location = personRepository.findById(id).get().getLocation();
-            Weather weather = restTemplate.getForObject("http://localhost:8086/location/weather?location="+location, Weather.class);
+            Weather weather = restTemplate.getForObject("http://localhost:8086/location/weather?name="+location, Weather.class);
             return new ResponseEntity(weather, HttpStatus.OK);
         }
         return new ResponseEntity(null, HttpStatus.NOT_FOUND);
