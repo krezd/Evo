@@ -37,9 +37,9 @@ public class LocationController {
         return locationService.save(location);
     }
 
-    @PutMapping("/")
-    public ResponseEntity<Location> update(@RequestBody Location location) {
-        return locationService.updateLocation(location);
+     @PutMapping("/")
+    public ResponseEntity<Location> update(@RequestParam("name") String name,@RequestBody Location location) {
+        return locationService.updateLocation(name,location);
     }
     @DeleteMapping("/")
     public ResponseEntity<HttpStatus> delete(@RequestParam("name") String location) throws Exception {
