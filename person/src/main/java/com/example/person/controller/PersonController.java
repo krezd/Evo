@@ -43,5 +43,14 @@ public class PersonController {
                 : new ResponseEntity(personRepository.save(person), HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable int id) {
+        return personService.delete(id);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<Person> updatePerson(@PathVariable int id,@RequestBody Person person) {
+        return personService.update(id,person);
+    }
+
 
 }

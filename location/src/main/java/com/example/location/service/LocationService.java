@@ -5,6 +5,8 @@ import com.example.location.model.Weather;
 import com.example.location.repository.LocationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,12 +19,21 @@ import java.util.Map;
 @Service
 public class LocationService {
 
-    @Autowired
-    private RestTemplate restTemplate;
+
+    private final RestTemplate loadBalancedRestTemplate;
+    private final RestTemplate restTemplate;
+
+    public LocationService(@Qualifier("loadBalancedRestTemplate") RestTemplate loadBalancedRestTemplate,
+                             @Qualifier("restTemplate") RestTemplate restTemplate) {
+        this.loadBalancedRestTemplate = loadBalancedRestTemplate;
+        this.restTemplate = restTemplate;
+    }
     @Autowired
     private LocationRepository locationRepository;
     @Autowired
     private ObjectMapper objectMapper;
+    @Value("${weather.url}")
+    private String weatherUrl;
 
     public Weather getLocForWeather(String location) throws Exception {
         Location searchedLocation = locationRepository.findByName(location).orElse(null);
@@ -32,13 +43,17 @@ public class LocationService {
             if (response != null && !response.isEmpty()) {
                 Map<String, Object> locationData = response.get(0);
                 Location loc = objectMapper.convertValue(locationData, Location.class);
-                locationRepository.save(loc);
-                return restTemplate.getForObject("http://localhost:8087/weather?lat=" + loc.getLat() + "&lon=" + loc.getLon(), Weather.class);
+                searchedLocation = locationRepository.findByName(loc.getName()).orElse(null);
+                if (searchedLocation == null){
+                    locationRepository.save(loc);
+                }
+
+                return loadBalancedRestTemplate.getForObject("http://"+weatherUrl+"/weather?lat=" + loc.getLat() + "&lon=" + loc.getLon(), Weather.class);
             } else {
                 throw new Exception("Location not found");
             }
         }
-        return restTemplate.getForObject("http://localhost:8087/weather?lat=" +searchedLocation.getLat() + "&lon=" + searchedLocation.getLon(), Weather.class);
+        return loadBalancedRestTemplate.getForObject("http://"+weatherUrl+"/weather?lat=" +searchedLocation.getLat() + "&lon=" + searchedLocation.getLon(), Weather.class);
     }
 
 
