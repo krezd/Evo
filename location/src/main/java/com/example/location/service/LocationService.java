@@ -56,8 +56,8 @@ public class LocationService {
         return new ResponseEntity(locationRepository.findByName(name), HttpStatus.OK);
     }
 
-    public ResponseEntity<Location> updateLocation(Location location){
-        Location searchedLocation = locationRepository.findByName(location.getName()).orElse(null);
+    public ResponseEntity<Location> updateLocation(String name, Location location){
+        Location searchedLocation = locationRepository.findByName(name).orElse(null);
         if (searchedLocation != null) {
             searchedLocation.setLat(location.getLat());
             searchedLocation.setLon(location.getLon());
